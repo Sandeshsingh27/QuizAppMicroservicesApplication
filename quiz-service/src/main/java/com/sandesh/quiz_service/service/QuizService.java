@@ -1,6 +1,7 @@
 package com.sandesh.quiz_service.service;
 
 import com.sandesh.quiz_service.dao.QuizDao;
+import com.sandesh.quiz_service.feign.QuizInterface;
 import com.sandesh.quiz_service.model.QuestionWrapper;
 import com.sandesh.quiz_service.model.Quiz;
 import com.sandesh.quiz_service.model.Response;
@@ -19,19 +20,17 @@ public class QuizService {
     @Autowired
     QuizDao quizDao;
 
-//    @Autowired
-//    QuestionDao questionDao;
+    @Autowired
+    QuizInterface quizInterface;
 
 
     // this will create quiz
     public ResponseEntity<String> createQuiz(String category, int numQues, String title) {
-//        List<Question> questions = questionDao.findRandomQuestionsByCategory(category, numQues);
-//
-//        Quiz quiz = new Quiz();
-//        quiz.setTitle(title);
-//        quiz.setQuestions(questions);
-//
-//        quizDao.save(quiz);
+        List<Integer> questions = quizInterface.getQuestionsForQuiz(category, numQues).getBody();
+        Quiz quiz = new Quiz();
+        quiz.setTitle(title);
+        quiz.setQuestionIds(questions);
+        quizDao.save(quiz);
 
         return new ResponseEntity<>("Quiz Created", HttpStatus.OK);
     }
