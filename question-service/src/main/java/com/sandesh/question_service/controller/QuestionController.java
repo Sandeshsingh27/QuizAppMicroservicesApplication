@@ -2,6 +2,8 @@ package com.sandesh.question_service.controller;
 
 
 import com.sandesh.question_service.model.Question;
+import com.sandesh.question_service.model.QuestionWrapper;
+import com.sandesh.question_service.model.Response;
 import com.sandesh.question_service.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -44,5 +46,24 @@ public class QuestionController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteQuestion(@PathVariable("id") int id) {
         return questionService.deleteQuestion(id);
+    }
+
+    // Generating questions for the quiz
+    @GetMapping("generate")
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz (@RequestParam String categoryName, @RequestParam Integer numQuestions ){
+        return questionService.getQuestionsForQuiz(categoryName, numQuestions);
+    }
+
+    // this will fetch all the question in a quiz
+    @PostMapping("getQuestions")
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(@RequestBody List<Integer> questionIds){
+//        System.out.println(environment.getProperty("local.server.port"));
+        return questionService.getQuestionsFromId(questionIds);
+    }
+
+    @PostMapping("getScore")
+    public ResponseEntity<Integer> getScore(@RequestBody List<Response> responses)
+    {
+        return questionService.calculateScore(responses);
     }
 }

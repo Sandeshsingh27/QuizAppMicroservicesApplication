@@ -3,6 +3,8 @@ package com.sandesh.question_service.service;
 
 import com.sandesh.question_service.dao.QuestionDao;
 import com.sandesh.question_service.model.Question;
+import com.sandesh.question_service.model.QuestionWrapper;
+import com.sandesh.question_service.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,5 +96,42 @@ public class QuestionService {
             e.printStackTrace();
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(String categoryName, Integer numQuestions) {
+        List<Integer> questions = questionDao.findRandomQuestionsByCategory(categoryName, numQuestions);
+        return new ResponseEntity<>(questions, HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(List<Integer> questionIds) {
+        List<QuestionWrapper> wrappers = new ArrayList<>();
+        List<Question> questions = new ArrayList<>();
+
+        for(Integer id : questionIds){
+            questions.add(questionDao.findById(id).get());
+        }
+
+        for(Question question : questions){
+            QuestionWrapper wrapper = new QuestionWrapper(question.getId(), question.getCategory(), question.getDifficultyLevel(), question.getQuestionTitle(), question.getOption1(), question.getOption2(), question.getOption3(), question.getOption4());
+            wrappers.add(wrapper);
+        }
+
+        return new ResponseEntity<>(wrappers, HttpStatus.OK);
+    }
+
+    // this function will calculate score based on user responses
+    public ResponseEntity<Integer> calculateScore(List<Response> responses) {
+        int score = 0;
+
+        for(Response response : responses){
+            Question questionFromDB = questionDao.findById(response.getId()).get();
+            String correctAnswerFromDB = questionFromDB.getRightAnswer();
+
+            String userResponse = response.getResponse();
+
+            if(userResponse.equals(correctAnswerFromDB))
+                score++;
+        }
+        return new ResponseEntity<>(score, HttpStatus.OK);
     }
 }
